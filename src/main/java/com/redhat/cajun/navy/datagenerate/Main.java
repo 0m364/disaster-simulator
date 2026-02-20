@@ -19,6 +19,10 @@ public class Main {
         generate.setRequired(true);
         options.addOption(generate);
 
+        Option scrape = new Option("s", "scrape", true, "file path to scraped data json");
+        scrape.setRequired(false);
+        options.addOption(scrape);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -34,15 +38,29 @@ public class Main {
 
         int number = Integer.parseInt(cmd.getOptionValue("g"));
 
+        Disaster disaster = new Disaster("fnames.txt","lnames.txt");
+        if (cmd.hasOption("scrape")) {
+            String scrapeFile = cmd.getOptionValue("scrape");
+            DataScraper scraper = new DataScraper();
+            ScrapedData data = scraper.scrape(scrapeFile);
+            if (data != null) {
+                disaster.applyScrapedData(data);
+            }
+        }
+
         switch(cmd.getOptionValue("m")) {
             case "server":
                 Vertx vertx = Vertx.vertx();
+                // Pass scraped file path via system property if needed, or rely on config
+                if (cmd.hasOption("scrape")) {
+                    System.setProperty("simulation.scraped.data.file", cmd.getOptionValue("scrape"));
+                }
                 vertx.rxDeployVerticle(MainVerticle.class.getName())
                         .subscribe();
                 break;
             case "cli":
                 System.out.println("Generating Victims List in Json");
-                System.out.println(new Disaster("fnames.txt","lnames.txt").generateVictims(number));
+                System.out.println(disaster.generateVictims(number));
                 break;
             default: System.err.println("Incorrect mode");
         }

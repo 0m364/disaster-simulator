@@ -64,6 +64,36 @@ public class Disaster {
         this.responderHelicopterProb = responderHelicopterProb;
     }
 
+    public void applyScrapedData(ScrapedData data) {
+        if (data == null) return;
+
+        // Adjust people count based on average household size
+        int avg = (int) Math.round(data.getAvgPeoplePerHousehold());
+        this.minPeople = Math.max(1, avg - 1);
+        this.maxPeople = avg + 2;
+
+        // Adjust medical need probability
+        this.medicalNeededProb = data.getMedicalNeedRate();
+
+        // Adjust responder availability/capacity based on density
+        if (data.getResponderDensity() < 0.05) {
+            // Low density, maybe fewer boats or smaller capacity
+            this.maxBoatCapacity = Math.max(1, this.maxBoatCapacity - 2);
+        } else if (data.getResponderDensity() > 0.1) {
+            // High density, more resources
+            this.maxBoatCapacity += 2;
+        }
+
+        // Adjust risk factors based on regional risk
+        if (data.getRegionalRiskFactor() > 1.5) {
+            this.consciousProb *= 0.8; // More likely to be unconscious
+            this.mobilityAmbulatoryProb *= 0.8; // More mobility issues
+        }
+
+        log.info("Applied scraped data: AvgPeople=" + avg + ", MedProb=" + medicalNeededProb +
+                 ", MaxBoat=" + maxBoatCapacity + ", ConsciousProb=" + consciousProb);
+    }
+
 
     public Victim generateVictim(){
         Victim v = new Victim();

@@ -38,6 +38,45 @@ public class HttpApplication extends AbstractVerticle {
     @Override
     public void start(Future<Void> future) {
         disaster = new Disaster(config().getString("fnames.file"), config().getString("lnames.file"));
+        disaster.setSimulationParameters(
+            config().getInteger("simulation.minPeople", 1),
+            config().getInteger("simulation.maxPeople", 10),
+            config().getDouble("simulation.peopleBias", 1.3),
+            config().getDouble("simulation.medicalNeededProb", 0.5),
+            config().getInteger("simulation.minBoatCapacity", 1),
+            config().getInteger("simulation.maxBoatCapacity", 12),
+            config().getDouble("simulation.boatCapacityBias", 0.5),
+            config().getDouble("simulation.medicalKitProb", 0.5)
+        );
+        disaster.setElaborateSimulationParameters(
+            config().getDouble("simulation.prob.pregnant", 0.1),
+            config().getDouble("simulation.prob.conscious", 0.9),
+            config().getDouble("simulation.prob.mobility.ambulatory", 0.7),
+            config().getDouble("simulation.prob.mobility.assisted", 0.2),
+            config().getDouble("simulation.prob.responder.boat", 0.8),
+            config().getDouble("simulation.prob.responder.helicopter", 0.05)
+        );
+
+        String geoJsonFile = config().getString("simulation.geojson.file");
+        if (geoJsonFile != null && !geoJsonFile.isEmpty()) {
+            GeoJsonLoader loader = new GeoJsonLoader();
+            List<Zone> zones = loader.load(geoJsonFile);
+            if (!zones.isEmpty()) {
+                disaster.boundingPolygons.setInclusionZones(zones);
+                log.info("Loaded GeoJSON zones from: " + geoJsonFile);
+            }
+        }
+
+        String scrapedDataFile = config().getString("simulation.scraped.data.file");
+        if (scrapedDataFile != null && !scrapedDataFile.isEmpty()) {
+            DataScraper scraper = new DataScraper();
+            ScrapedData data = scraper.scrape(scrapedDataFile);
+            if (data != null) {
+                disaster.applyScrapedData(data);
+                log.info("Applied scraped data from: " + scrapedDataFile);
+            }
+        }
+
         isDryRun = config().getBoolean("is.dryrun", false);
 
         // Create a router object.

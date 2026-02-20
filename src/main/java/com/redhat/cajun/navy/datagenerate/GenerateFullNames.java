@@ -1,7 +1,12 @@
 package com.redhat.cajun.navy.datagenerate;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,17 +28,31 @@ public class GenerateFullNames {
     public Map<Integer, String> getMapFromFile(String fileName) {
         Map<Integer, String> temp = new HashMap<>();
         int count = 0;
-        try {
-            try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-                for (String line; (line = br.readLine()) != null; ) {
-                    temp.put(count, line);
-                    count++;
-                }
+        try (BufferedReader br = new BufferedReader(createReader(fileName))) {
+            for (String line; (line = br.readLine()) != null; ) {
+                temp.put(count, line);
+                count++;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return temp;
+    }
+
+    private Reader createReader(String fileName) throws FileNotFoundException {
+        File file = new File(fileName);
+        if (file.exists() && file.isFile()) {
+            return new FileReader(file);
+        }
+        InputStream is = getClass().getResourceAsStream("/" + fileName);
+        if (is != null) {
+            return new InputStreamReader(is);
+        }
+        is = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (is != null) {
+            return new InputStreamReader(is);
+        }
+        throw new FileNotFoundException("File not found: " + fileName);
     }
 
     public String getNextLastName() {

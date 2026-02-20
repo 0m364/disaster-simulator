@@ -6,33 +6,49 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.awt.geom.Path2D.Double;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BoundingPolygons {
 	private Double exclusionPolygons = null;
-	private Double inclusionPolygons = null;
+	private List<Zone> inclusionZones = new ArrayList<>();
+
+	public BoundingPolygons() {
+		// Default inclusion polygon (Wilmington, NC area approx)
+		Waypoint[] defaultPoints = new Waypoint[] {
+				new Waypoint(34.20, -77.98),
+				new Waypoint(34.20, -77.90),
+				new Waypoint(34.25, -77.90),
+				new Waypoint(34.25, -77.98),
+				new Waypoint(34.20, -77.98) // Close the loop
+		};
+		setInclusionPolygon(defaultPoints);
+	}
+
+    public void setInclusionZones(List<Zone> zones) {
+        this.inclusionZones = zones;
+    }
 
 	public void setInclusionPolygon(Waypoint waypoints[])
 	{
-		if(inclusionPolygons == null)
-		{
-			inclusionPolygons = new Double();	
-		}
-		
 		if(waypoints.length <= 2)
 		{
 			throw new RuntimeException("You must set at least 3 points that are not in a line to make an inclusion zone");
 		}
 		
+		Double path = new Double();
 		for(int c = 0; c < waypoints.length; c++)
 		{
 			
 			if(c == 0)
 			{
-				inclusionPolygons.moveTo(waypoints[c].getX(), waypoints[c].getY());
+				path.moveTo(waypoints[c].getX(), waypoints[c].getY());
 			}else {
-				inclusionPolygons.lineTo(waypoints[c].getX(), waypoints[c].getY());
+				path.lineTo(waypoints[c].getX(), waypoints[c].getY());
 			}
 		}
-		inclusionPolygons.closePath();
+		path.closePath();
+        inclusionZones.add(new Zone(path, 1.0));
 	}
 	
 	public void setExclusionPolygon(Waypoint waypoints[])
@@ -60,9 +76,9 @@ public class BoundingPolygons {
 		exclusionPolygons.closePath();
 	}
 	
-	private Waypoint getWaypoint()
+	private Waypoint getWaypoint(Zone zone)
 	{
-		Rectangle2D boundingRectangle = inclusionPolygons.getBounds2D();
+		Rectangle2D boundingRectangle = zone.getBounds();
 		
 		double longitude = 0;
 		double latitude = 0;
@@ -90,41 +106,45 @@ public class BoundingPolygons {
 	
 	public Waypoint getInternalWaypoint()
 	{
+        if (inclusionZones.isEmpty()) {
+            throw new RuntimeException("No inclusion zones defined");
+        }
+
 		boolean running = true;
 		int c = 0;
 		while(running)
 		{
-			Waypoint waypoint = getWaypoint();
-			//System.err.println("Waypoint 1: " + waypoint + " " å+ exclusionPolygons);
-			if((inclusionPolygons.contains(waypoint.getX(), waypoint.getY()) && exclusionPolygons == null) ||
-			   (inclusionPolygons.contains(waypoint.getX(), waypoint.getY()) && exclusionPolygons != null && !exclusionPolygons.contains(waypoint.getX(), waypoint.getY())))
+            // Pick a zone based on weight
+            Zone zone = selectWeightedZone();
+			Waypoint waypoint = getWaypoint(zone);
+
+			if((zone.contains(waypoint.getX(), waypoint.getY()) && exclusionPolygons == null) ||
+			   (zone.contains(waypoint.getX(), waypoint.getY()) && exclusionPolygons != null && !exclusionPolygons.contains(waypoint.getX(), waypoint.getY())))
 			{
-				//System.err.println("Waypoint 2: " + waypoint);
 				return waypoint;
 			}else {
 				c++;
-				//100 because 10 didn't work
-				//This ensure that we will always return if something goes sideways so we do not lock up this thread.
-				//Think of this as a circuit breaker after 100 iterations.
 			   if(c > 100)
 			   {
 				   running = false;
-				   //System.err.println("Stopping at 100");
 			   }
 			}
 		}
-		/*
-		System.err.println(boundingRectangle.getMinX());
-		System.err.println(boundingRectangle.getMaxX());
-		System.err.println(boundingRectangle.getMinY());
-		System.err.println(boundingRectangle.getMaxY());
-		System.err.println((boundingRectangle.getMaxX()+boundingRectangle.getMinX())/2);
-		System.err.println((boundingRectangle.getMaxY()+boundingRectangle.getMinY())/2);
-		*/
-
-		//System.err.println("Waypoint 3: " + getAveragedWaypoint());
 		return getAveragedWaypoint();
 	}
+
+    private Zone selectWeightedZone() {
+        double totalWeight = 0.0;
+        for (Zone z : inclusionZones) totalWeight += z.getWeight();
+
+        double r = ThreadLocalRandom.current().nextDouble() * totalWeight;
+        double count = 0.0;
+        for (Zone z : inclusionZones) {
+            count += z.getWeight();
+            if (count >= r) return z;
+        }
+        return inclusionZones.get(0);
+    }
 	
 	/**
 	 * 
@@ -136,7 +156,10 @@ public class BoundingPolygons {
 	{
 		System.err.println("Something has gone wrong with generating the random point, either we maxed out on the 100 iterations or our exclusion zone is too large");
 		
-		Rectangle2D boundingRectangle = inclusionPolygons.getBounds2D();
+        if (inclusionZones.isEmpty()) return new Waypoint(0,0);
+
+        Zone z = inclusionZones.get(0);
+		Rectangle2D boundingRectangle = z.getBounds();
 		return new Waypoint(Waypoint.round((boundingRectangle.getMaxY()+boundingRectangle.getMinY())/2, 5),
 				Waypoint.round((boundingRectangle.getMaxX()+boundingRectangle.getMinX())/2,5));
 	}
@@ -144,7 +167,7 @@ public class BoundingPolygons {
 	public void clearCurrentPolygons()
 	{
 		exclusionPolygons = null;
-		inclusionPolygons = null;
+		inclusionZones.clear();
 	}
 	
 	/**
@@ -182,30 +205,32 @@ public class BoundingPolygons {
         
         int c = 0;
         int base = 1000;
-        for(PathIterator pathIterator = inclusionPolygons.getPathIterator(null); !pathIterator.isDone(); c++ )
-        {
-        	double points[] = new double[6];
-        	int value = pathIterator.currentSegment(points);
-        	if(value == PathIterator.SEG_MOVETO || value == PathIterator.SEG_LINETO)
-        	{
-		        stringBuilder.append(points[1]);
-		        stringBuilder.append("\t");
-		        stringBuilder.append(points[0]);
-		        stringBuilder.append("\t");
-		        stringBuilder.append("square1");
-		        stringBuilder.append("\t");
-		        stringBuilder.append("green");
-		        stringBuilder.append("\t");
-		        stringBuilder.append(base+c);
-		        stringBuilder.append("\t");
-		        stringBuilder.append(base+c);
-		        stringBuilder.append(System.lineSeparator());
-        	}else {
-        		base+=1000;
-        		c=0;
-        	}
-        	
-	        pathIterator.next();
+        for (Zone zone : inclusionZones) {
+            for(PathIterator pathIterator = zone.getPath().getPathIterator(null); !pathIterator.isDone(); c++ )
+            {
+                double points[] = new double[6];
+                int value = pathIterator.currentSegment(points);
+                if(value == PathIterator.SEG_MOVETO || value == PathIterator.SEG_LINETO)
+                {
+                    stringBuilder.append(points[1]);
+                    stringBuilder.append("\t");
+                    stringBuilder.append(points[0]);
+                    stringBuilder.append("\t");
+                    stringBuilder.append("square1");
+                    stringBuilder.append("\t");
+                    stringBuilder.append("green");
+                    stringBuilder.append("\t");
+                    stringBuilder.append(base+c);
+                    stringBuilder.append("\t");
+                    stringBuilder.append(base+c);
+                    stringBuilder.append(System.lineSeparator());
+                }else {
+                    base+=1000;
+                    c=0;
+                }
+
+                pathIterator.next();
+            }
         }
         
         if(exclusionPolygons != null)

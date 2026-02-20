@@ -38,6 +38,16 @@ public class HttpApplication extends AbstractVerticle {
     @Override
     public void start(Future<Void> future) {
         disaster = new Disaster(config().getString("fnames.file"), config().getString("lnames.file"));
+        disaster.setSimulationParameters(
+            config().getInteger("simulation.minPeople", 1),
+            config().getInteger("simulation.maxPeople", 10),
+            config().getDouble("simulation.peopleBias", 1.3),
+            config().getDouble("simulation.medicalNeededProb", 0.5),
+            config().getInteger("simulation.minBoatCapacity", 1),
+            config().getInteger("simulation.maxBoatCapacity", 12),
+            config().getDouble("simulation.boatCapacityBias", 0.5),
+            config().getDouble("simulation.medicalKitProb", 0.5)
+        );
         isDryRun = config().getBoolean("is.dryrun", false);
 
         // Create a router object.

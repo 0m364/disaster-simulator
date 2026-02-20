@@ -10,6 +10,18 @@ public class BoundingPolygons {
 	private Double exclusionPolygons = null;
 	private Double inclusionPolygons = null;
 
+	public BoundingPolygons() {
+		// Default inclusion polygon (Wilmington, NC area approx)
+		Waypoint[] defaultPoints = new Waypoint[] {
+				new Waypoint(34.20, -77.98),
+				new Waypoint(34.20, -77.90),
+				new Waypoint(34.25, -77.90),
+				new Waypoint(34.25, -77.98),
+				new Waypoint(34.20, -77.98) // Close the loop
+		};
+		setInclusionPolygon(defaultPoints);
+	}
+
 	public void setInclusionPolygon(Waypoint waypoints[])
 	{
 		if(inclusionPolygons == null)

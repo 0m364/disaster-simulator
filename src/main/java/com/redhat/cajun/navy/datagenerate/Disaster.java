@@ -13,10 +13,33 @@ public class Disaster {
 
     private static GenerateFullNames fullNames = null;
     public BoundingPolygons boundingPolygons = new BoundingPolygons();
+    private Random random = new Random();
+
+    // Simulation Parameters with defaults
+    private int minPeople = 1;
+    private int maxPeople = 10;
+    private double peopleBias = 1.3;
+    private double medicalNeededProb = 0.5;
+    private int minBoatCapacity = 1;
+    private int maxBoatCapacity = 12;
+    private double boatCapacityBias = 0.5;
+    private double medicalKitProb = 0.5;
 
 
     public Disaster(String fNameFile, String lNameFile){
         fullNames = new GenerateFullNames(fNameFile,lNameFile);
+    }
+
+    public void setSimulationParameters(int minPeople, int maxPeople, double peopleBias, double medicalNeededProb,
+                                        int minBoatCapacity, int maxBoatCapacity, double boatCapacityBias, double medicalKitProb) {
+        this.minPeople = minPeople;
+        this.maxPeople = maxPeople;
+        this.peopleBias = peopleBias;
+        this.medicalNeededProb = medicalNeededProb;
+        this.minBoatCapacity = minBoatCapacity;
+        this.maxBoatCapacity = maxBoatCapacity;
+        this.boatCapacityBias = boatCapacityBias;
+        this.medicalKitProb = medicalKitProb;
     }
 
 
@@ -28,8 +51,8 @@ public class Disaster {
         v.setLatLon(point.getY(),point.getX());
 
         v.setVictimPhoneNumber(GeneratePhoneNumbers.getNextPhoneNumber());
-        v.setNumberOfPeople(biasedRandom(1, 10, 1.3));
-        v.setMedicalNeeded(new Random().nextBoolean());
+        v.setNumberOfPeople(biasedRandom(minPeople, maxPeople, peopleBias));
+        v.setMedicalNeeded(random.nextDouble() < medicalNeededProb);
 
         return v;
     }
@@ -47,8 +70,8 @@ public class Disaster {
         Waypoint point = boundingPolygons.getInternalWaypoint();
         responder.setName(fullNames.getNextFullName());
         responder.setPhoneNumber(GeneratePhoneNumbers.getNextPhoneNumber());
-        responder.setBoatCapacity(biasedRandom(1, 12, 0.5));
-        responder.setMedicalKit(new Random().nextBoolean());
+        responder.setBoatCapacity(biasedRandom(minBoatCapacity, maxBoatCapacity, boatCapacityBias));
+        responder.setMedicalKit(random.nextDouble() < medicalKitProb);
         responder.setLatitude(point.getY());
         responder.setLongitude(point.getX());
         responder.setEnrolled(true);

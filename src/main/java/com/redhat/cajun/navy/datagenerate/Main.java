@@ -23,6 +23,10 @@ public class Main {
         scrape.setRequired(false);
         options.addOption(scrape);
 
+        Option geojson = new Option("map", "geojson", true, "file path to geojson map file");
+        geojson.setRequired(false);
+        options.addOption(geojson);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -48,12 +52,24 @@ public class Main {
             }
         }
 
+        if (cmd.hasOption("geojson")) {
+            String geoJsonFile = cmd.getOptionValue("geojson");
+            GeoJsonLoader loader = new GeoJsonLoader();
+            java.util.List<Zone> zones = loader.load(geoJsonFile);
+            if (!zones.isEmpty()) {
+                disaster.boundingPolygons.setInclusionZones(zones);
+            }
+        }
+
         switch(cmd.getOptionValue("m")) {
             case "server":
                 Vertx vertx = Vertx.vertx();
                 // Pass scraped file path via system property if needed, or rely on config
                 if (cmd.hasOption("scrape")) {
                     System.setProperty("simulation.scraped.data.file", cmd.getOptionValue("scrape"));
+                }
+                if (cmd.hasOption("geojson")) {
+                    System.setProperty("simulation.geojson.file", cmd.getOptionValue("geojson"));
                 }
                 vertx.rxDeployVerticle(MainVerticle.class.getName())
                         .subscribe();

@@ -5,6 +5,7 @@ public class ScrapedData {
     private double medicalNeedRate;
     private double responderDensity;
     private double regionalRiskFactor;
+    private ImprobabilityFactor improbabilityFactor;
 
     public double getAvgPeoplePerHousehold() {
         return avgPeoplePerHousehold;
@@ -36,5 +37,13 @@ public class ScrapedData {
 
     public void setRegionalRiskFactor(double regionalRiskFactor) {
         this.regionalRiskFactor = regionalRiskFactor;
+    }
+
+    public ImprobabilityFactor getImprobabilityFactor() {
+        return improbabilityFactor;
+    }
+
+    public void setImprobabilityFactor(ImprobabilityFactor improbabilityFactor) {
+        this.improbabilityFactor = improbabilityFactor;
     }
 }

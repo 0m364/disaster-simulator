@@ -23,6 +23,16 @@ public class DataScraper {
             data.setResponderDensity(json.getDouble("responderDensity", 0.05));
             data.setRegionalRiskFactor(json.getDouble("regionalRiskFactor", 1.0));
 
+            JsonObject improbability = json.getJsonObject("improbabilityFactor");
+            if (improbability != null) {
+                ImprobabilityFactor factor = new ImprobabilityFactor();
+                factor.setExternalExploitation(improbability.getDouble("externalExploitation", 0.0));
+                factor.setInternalUnrest(improbability.getDouble("internalUnrest", 0.0));
+                factor.setIncreasedCrime(improbability.getDouble("increasedCrime", 0.0));
+                factor.setDecreasedResponseRatio(improbability.getDouble("decreasedResponseRatio", 0.0));
+                data.setImprobabilityFactor(factor);
+            }
+
             return data;
         } catch (IOException e) {
             System.err.println("Error reading scraped data file: " + e.getMessage());

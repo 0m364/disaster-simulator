@@ -80,6 +80,7 @@ public class MainVerticle extends AbstractVerticle {
                         .put("simulation.prob.responder.boat", 0.8)
                         .put("simulation.prob.responder.helicopter", 0.05)
                         .put("simulation.scraped.data.file", "")
+                        .put("simulation.geojson.file", "")
                 );
         options.addStore(defaults);
 

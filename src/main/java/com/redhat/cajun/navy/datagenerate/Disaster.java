@@ -90,6 +90,27 @@ public class Disaster {
             this.mobilityAmbulatoryProb *= 0.8; // More mobility issues
         }
 
+        if (data.getImprobabilityFactor() != null) {
+            ImprobabilityFactor factor = data.getImprobabilityFactor();
+            if (factor.getExternalExploitation() > 0.5) {
+                this.responderBoatProb *= 0.5; // Reduced local resources due to exploitation
+                this.maxBoatCapacity = Math.max(1, (int)(this.maxBoatCapacity * 0.7));
+            }
+            if (factor.getInternalUnrest() > 0.5) {
+                this.medicalNeededProb = Math.min(1.0, this.medicalNeededProb * 1.5);
+                this.consciousProb *= 0.7; // Violence leads to more trauma
+            }
+            if (factor.getIncreasedCrime() > 0.5) {
+                // Responders are slower due to caution
+                // Note: Speed is dynamic in generateResponder, but we can reflect this by reducing density or capacity
+                this.boatCapacityBias = Math.max(0.1, this.boatCapacityBias - 0.2);
+            }
+            if (factor.getDecreasedResponseRatio() > 0.0) {
+                // Direct impact on availability logic if we had it, for now we can simulate by making responders less effective
+                this.maxBoatCapacity = Math.max(1, (int)(this.maxBoatCapacity * (1.0 - factor.getDecreasedResponseRatio())));
+            }
+        }
+
         log.info("Applied scraped data: AvgPeople=" + avg + ", MedProb=" + medicalNeededProb +
                  ", MaxBoat=" + maxBoatCapacity + ", ConsciousProb=" + consciousProb);
     }

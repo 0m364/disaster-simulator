@@ -73,6 +73,12 @@ public class MainVerticle extends AbstractVerticle {
                         .put("simulation.maxBoatCapacity", 12)
                         .put("simulation.boatCapacityBias", 0.5)
                         .put("simulation.medicalKitProb", 0.5)
+                        .put("simulation.prob.pregnant", 0.1)
+                        .put("simulation.prob.conscious", 0.9)
+                        .put("simulation.prob.mobility.ambulatory", 0.7)
+                        .put("simulation.prob.mobility.assisted", 0.2)
+                        .put("simulation.prob.responder.boat", 0.8)
+                        .put("simulation.prob.responder.helicopter", 0.05)
                 );
         options.addStore(defaults);
 

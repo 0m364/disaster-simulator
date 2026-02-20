@@ -48,6 +48,14 @@ public class HttpApplication extends AbstractVerticle {
             config().getDouble("simulation.boatCapacityBias", 0.5),
             config().getDouble("simulation.medicalKitProb", 0.5)
         );
+        disaster.setElaborateSimulationParameters(
+            config().getDouble("simulation.prob.pregnant", 0.1),
+            config().getDouble("simulation.prob.conscious", 0.9),
+            config().getDouble("simulation.prob.mobility.ambulatory", 0.7),
+            config().getDouble("simulation.prob.mobility.assisted", 0.2),
+            config().getDouble("simulation.prob.responder.boat", 0.8),
+            config().getDouble("simulation.prob.responder.helicopter", 0.05)
+        );
         isDryRun = config().getBoolean("is.dryrun", false);
 
         // Create a router object.

@@ -3,6 +3,10 @@ package com.redhat.cajun.navy.datagenerate;
 
 import org.apache.commons.cli.*;
 import io.vertx.reactivex.core.Vertx;
+import com.redhat.cajun.navy.datagenerate.physics.PhysicsSimulation;
+import com.redhat.cajun.navy.datagenerate.visualization.ImageRenderer;
+import java.util.List;
+import java.io.File;
 
 public class Main {
 
@@ -26,6 +30,18 @@ public class Main {
         Option geojson = new Option("map", "geojson", true, "file path to geojson map file");
         geojson.setRequired(false);
         options.addOption(geojson);
+
+        Option sim = new Option("sim", "simulation", false, "run physics simulation");
+        sim.setRequired(false);
+        options.addOption(sim);
+
+        Option steps = new Option("steps", "steps", true, "simulation steps (default 10)");
+        steps.setRequired(false);
+        options.addOption(steps);
+
+        Option out = new Option("out", "output", true, "output directory for images (default: output)");
+        out.setRequired(false);
+        options.addOption(out);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -75,8 +91,48 @@ public class Main {
                         .subscribe();
                 break;
             case "cli":
-                System.out.println("Generating Victims List in Json");
-                System.out.println(disaster.generateVictims(number));
+                if (cmd.hasOption("sim")) {
+                    int simSteps = 10;
+                    if (cmd.hasOption("steps")) {
+                        try {
+                            simSteps = Integer.parseInt(cmd.getOptionValue("steps"));
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid steps number, using default 10");
+                        }
+                    }
+                    String outDir = "output";
+                    if (cmd.hasOption("out")) {
+                        outDir = cmd.getOptionValue("out");
+                    }
+                    File dir = new File(outDir);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+
+                    List<Victim> victims = disaster.generateVictims(number);
+                    List<Responder> responders = disaster.generateResponders(number);
+                    System.out.println("Generated " + victims.size() + " victims and " + responders.size() + " responders.");
+
+                    PhysicsSimulation physics = new PhysicsSimulation();
+                    physics.init(disaster.boundingPolygons);
+
+                    for (Victim v : victims) physics.addVictim(v);
+                    for (Responder r : responders) physics.addResponder(r);
+
+                    ImageRenderer renderer = new ImageRenderer();
+
+                    for (int i = 0; i < simSteps; i++) {
+                        physics.step(1.0);
+                        physics.updateEntities();
+                        renderer.render(physics, disaster.boundingPolygons, outDir + "/step_" + String.format("%03d", i) + ".png");
+                        System.out.println("Step " + i + " complete.");
+                    }
+                    System.out.println("Simulation complete. Images saved to " + outDir);
+
+                } else {
+                    System.out.println("Generating Victims List in Json");
+                    System.out.println(disaster.generateVictims(number));
+                }
                 break;
             default: System.err.println("Incorrect mode");
         }

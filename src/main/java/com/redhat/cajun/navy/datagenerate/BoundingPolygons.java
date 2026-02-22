@@ -29,6 +29,10 @@ public class BoundingPolygons {
         this.inclusionZones = zones;
     }
 
+    public List<Zone> getInclusionZones() {
+        return inclusionZones;
+    }
+
 	public void setInclusionPolygon(Waypoint waypoints[])
 	{
 		if(waypoints.length <= 2)

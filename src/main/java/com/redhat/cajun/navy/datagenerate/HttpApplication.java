@@ -295,7 +295,6 @@ public class HttpApplication extends AbstractVerticle {
             config().getString("disaster.service.host"), 
             config().getString("disaster.service.path.inclusion.zones")
         ).send(response -> {
-            log.info("Received response from disaster service: {}", response.result().bodyAsJsonArray().encodePrettily());
             ServicePolygon polygons[] = Json.decodeValue(response.result().bodyAsString(), ServicePolygon[].class);
             for (ServicePolygon polygon : polygons) {
                 Waypoint waypoints[] = new Waypoint[polygon.getPoints().size()];
@@ -303,7 +302,7 @@ public class HttpApplication extends AbstractVerticle {
                     .map(point -> new Waypoint(point[1], point[0]))
                     .collect(Collectors.toList())
                     .toArray(waypoints);
-                log.info("Adding inclusion polygon to disaster: {}", waypoints.toString());
+                log.info("Adding inclusion polygon to disaster with {} points", waypoints.length);
                 disaster.boundingPolygons.setInclusionPolygon(waypoints);
             }
             future.complete();

@@ -10,7 +10,7 @@ import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class GenerateFullNames {
@@ -56,11 +56,11 @@ public class GenerateFullNames {
     }
 
     public String getNextLastName() {
-        return lNames.get(new Random().nextInt(lNames.size()));
+        return lNames.get(ThreadLocalRandom.current().nextInt(lNames.size()));
     }
 
     public String getNextFirstName() {
-        return fNames.get(new Random().nextInt(fNames.size()));
+        return fNames.get(ThreadLocalRandom.current().nextInt(fNames.size()));
     }
 
 

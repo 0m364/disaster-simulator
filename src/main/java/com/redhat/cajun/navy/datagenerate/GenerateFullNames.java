@@ -7,31 +7,29 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class GenerateFullNames {
 
-    private static Map<Integer, String> fNames = null;
+    private static List<String> fNames = null;
 
-    private static Map<Integer, String> lNames = null;
+    private static List<String> lNames = null;
 
 
     public GenerateFullNames(String fNameFile, String lNameFile) {
-        fNames = Collections.unmodifiableMap(getMapFromFile(fNameFile));
-        lNames = Collections.unmodifiableMap(getMapFromFile(lNameFile));
+        fNames = Collections.unmodifiableList(getListFromFile(fNameFile));
+        lNames = Collections.unmodifiableList(getListFromFile(lNameFile));
     }
 
-    public Map<Integer, String> getMapFromFile(String fileName) {
-        Map<Integer, String> temp = new HashMap<>();
-        int count = 0;
+    public List<String> getListFromFile(String fileName) {
+        List<String> temp = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(createReader(fileName))) {
             for (String line; (line = br.readLine()) != null; ) {
-                temp.put(count, line);
-                count++;
+                temp.add(line);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,7 +1,9 @@
 package com.redhat.cajun.navy.datagenerate;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -140,112 +142,60 @@ public class RestClientVerticle extends AbstractVerticle {
 
     private void resetResponders() {
         client.post(responderServicePort, responderServiceHost, responderServiceResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset responders: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Clear responders failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset responders", "Reset responders failed."));
     }
 
     private void clearResponders() {
         client.post(responderServicePort, responderServiceHost, responderServiceClearPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Clear responders: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Clear responders failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Clear responders", "Clear responders failed."));
     }
 
     private void createIncident(Message<JsonObject> message) {
+        String victimName = message.body().getString("victimName");
         client.post(incidentServicePort, incidentServiceHost, incidentServiceCreatePath)
-                .sendJsonObject(message.body(), ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Create incident for " + message.body().getString("victimName") + ": HTTP response status " + response.statusCode());
-                    }
-                    else log.error("Create incident for " + message.body().getString("victimName") + " failed.", ar.cause());
-
-                });
+                .sendJsonObject(message.body(), handleResponse("Create incident for " + victimName, "Create incident for " + victimName + " failed."));
     }
 
     private void createResponders(Message<JsonObject> message) {
-
         client.post(responderServicePort, responderServiceHost, responderServiceCreatePath)
                 .putHeader("Content-Type", "application/json")
-                .sendBuffer(message.body().getJsonArray("responders").toBuffer(), ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Create responders: HTTP response status " + response.statusCode());
-                    }
-                    else log.error("Create Responders failed.", ar.cause());
-
-                });
+                .sendBuffer(message.body().getJsonArray("responders").toBuffer(), handleResponse("Create responders", "Create Responders failed."));
     }
 
     private void resetIncidents() {
         client.post(incidentServicePort, incidentServiceHost, incidentServiceResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset incidents: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Reset incidents failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset incidents", "Reset incidents failed."));
     }
 
     private void resetMissions() {
         client.post(missionServicePort, missionServiceHost, missionServiceResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset missions: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Reset missions failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset missions", "Reset missions failed."));
     }
 
     private void abortProcessInstances() {
         client.post(processServicePort, processServiceHost, processServiceResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset pInstances: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Reset pInstances failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset pInstances", "Reset pInstances failed."));
     }
 
     private void resetResponderSimulator() {
         client.post(responderSimulatorPort, responderSimulatorHost, responderSimulatorResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset responder simulator: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Reset responder simulator failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset responder simulator", "Reset responder simulator failed."));
     }
 
     private void resetIncidentPriority() {
         client.post(incidentPriorityServicePort, incidentPriorityServiceHost, incidentPriorityServiceResetPath)
-                .send(ar -> {
-                    if (ar.succeeded()) {
-                        HttpResponse<Buffer> response = ar.result();
-                        log.info("Reset incident priority: HTTP response status " + response.statusCode());
-                    } else {
-                        log.error("Reset incident priority failed.", ar.cause());
-                    }
-                });
+                .send(handleResponse("Reset incident priority", "Reset incident priority failed."));
+    }
+
+    private Handler<AsyncResult<HttpResponse<Buffer>>> handleResponse(String successMsg, String errorMsg) {
+        return ar -> {
+            if (ar.succeeded()) {
+                HttpResponse<Buffer> response = ar.result();
+                log.info(successMsg + ": HTTP response status " + response.statusCode());
+            } else {
+                log.error(errorMsg, ar.cause());
+            }
+        };
     }
 }
 

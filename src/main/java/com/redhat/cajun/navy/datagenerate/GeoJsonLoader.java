@@ -2,6 +2,8 @@ package com.redhat.cajun.navy.datagenerate;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.awt.geom.Path2D;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeoJsonLoader {
+
+    private static Logger log = LoggerFactory.getLogger(GeoJsonLoader.class);
 
     public List<Zone> load(String filePath) {
         List<Zone> zones = new ArrayList<>();
@@ -46,7 +50,7 @@ public class GeoJsonLoader {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading GeoJSON file: " + e.getMessage());
+            log.error("Error reading GeoJSON file: " + e.getMessage());
         }
         return zones;
     }

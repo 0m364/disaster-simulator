@@ -76,11 +76,4 @@ public class Waypoint implements com.redhat.cajun.navy.datagenerateinterface.Way
 		return bd.doubleValue();
 	}
 	
-	public static void main(String args[])
-	{
-		System.err.println(new Waypoint(10, 10));
-		System.err.println(new Waypoint(30, 40));
-		System.err.println(new Waypoint(-90, -280));
-		
-	}
 }

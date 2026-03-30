@@ -1,12 +1,16 @@
 package com.redhat.cajun.navy.datagenerate;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class DataScraper {
+
+    private static Logger log = LoggerFactory.getLogger(DataScraper.class);
 
     public ScrapedData scrape(String filePath) {
         if (filePath == null) {
@@ -35,7 +39,7 @@ public class DataScraper {
 
             return data;
         } catch (IOException e) {
-            System.err.println("Error reading scraped data file: " + e.getMessage());
+            log.error("Error reading scraped data file: " + e.getMessage());
             return null;
         }
     }

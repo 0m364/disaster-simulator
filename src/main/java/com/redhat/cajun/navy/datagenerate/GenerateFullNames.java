@@ -1,5 +1,7 @@
 package com.redhat.cajun.navy.datagenerate;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +19,9 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class GenerateFullNames {
 
+    private static Logger log = LoggerFactory.getLogger(GenerateFullNames.class);
+
+    private static Map<Integer, String> fNames = null;
     private static volatile Map<Integer, String> fNames = null;
 
     private static volatile Map<Integer, String> lNames = null;

@@ -2,6 +2,8 @@ package com.redhat.cajun.navy.datagenerate;
 
 
 import org.apache.commons.cli.*;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.reactivex.core.Vertx;
 import com.redhat.cajun.navy.datagenerate.physics.PhysicsSimulation;
 import com.redhat.cajun.navy.datagenerate.visualization.ImageRenderer;
@@ -10,11 +12,15 @@ import java.io.File;
 
 public class Main {
 
+    private static Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws Exception {
         try {
             run(args);
         } catch (ParseException e) {
+            log.error(e.getMessage());
+            formatter.printHelp("Main -m server|cli -g NUMBER", options);
+
             System.out.println(e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("Main -m server|cli -g NUMBER", getOptions());
@@ -68,7 +74,7 @@ public class Main {
                         try {
                             simSteps = Integer.parseInt(cmd.getOptionValue("steps"));
                         } catch (NumberFormatException e) {
-                            System.err.println("Invalid steps number, using default 10");
+                            log.warn("Invalid steps number, using default 10");
                         }
                     }
                     String outDir = "output";
@@ -82,7 +88,7 @@ public class Main {
 
                     List<Victim> victims = disaster.generateVictims(number);
                     List<Responder> responders = disaster.generateResponders(number);
-                    System.out.println("Generated " + victims.size() + " victims and " + responders.size() + " responders.");
+                    log.info("Generated " + victims.size() + " victims and " + responders.size() + " responders.");
 
                     PhysicsSimulation physics = new PhysicsSimulation();
                     physics.init(disaster.boundingPolygons);
@@ -96,16 +102,16 @@ public class Main {
                         physics.step(1.0);
                         physics.updateEntities();
                         renderer.render(physics, disaster.boundingPolygons, outDir + "/step_" + String.format("%03d", i) + ".png");
-                        System.out.println("Step " + i + " complete.");
+                        log.info("Step " + i + " complete.");
                     }
-                    System.out.println("Simulation complete. Images saved to " + outDir);
+                    log.info("Simulation complete. Images saved to " + outDir);
 
                 } else {
-                    System.out.println("Generating Victims List in Json");
+                    log.info("Generating Victims List in Json");
                     System.out.println(disaster.generateVictims(number));
                 }
                 break;
-            default: System.err.println("Incorrect mode");
+            default: log.error("Incorrect mode");
         }
     }
 

@@ -4,6 +4,8 @@ import com.redhat.cajun.navy.datagenerate.BoundingPolygons;
 import com.redhat.cajun.navy.datagenerate.Zone;
 import com.redhat.cajun.navy.datagenerate.physics.CoordinateConverter;
 import com.redhat.cajun.navy.datagenerate.physics.PhysicsSimulation;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import com.redhat.cajun.navy.datagenerate.Responder;
 import com.redhat.cajun.navy.datagenerate.Victim;
 import io.vertx.core.logging.Logger;
@@ -22,6 +24,7 @@ import java.io.IOException;
 
 public class ImageRenderer {
 
+    private static Logger log = LoggerFactory.getLogger(ImageRenderer.class);
     private static final Logger log = LoggerFactory.getLogger(ImageRenderer.class);
 
     private int width = 1024;
@@ -29,7 +32,7 @@ public class ImageRenderer {
 
     public void render(PhysicsSimulation sim, BoundingPolygons map, String filepath) {
         if (map.getInclusionZones().isEmpty()) {
-            System.err.println("No zones to render.");
+            log.warn("No zones to render.");
             return;
         }
 
@@ -131,6 +134,7 @@ public class ImageRenderer {
         try {
             ImageIO.write(image, "PNG", new File(filepath));
         } catch (IOException e) {
+            log.error("Failed to write image", e);
             log.error("Failed to write image to " + filepath, e);
         }
     }

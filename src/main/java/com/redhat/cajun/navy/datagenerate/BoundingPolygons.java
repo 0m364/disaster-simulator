@@ -1,5 +1,7 @@
 package com.redhat.cajun.navy.datagenerate;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoundingPolygons {
+
+	private static Logger log = LoggerFactory.getLogger(BoundingPolygons.class);
+
 	private Double exclusionPolygons = null;
 	private List<Zone> inclusionZones = new ArrayList<>();
 
@@ -91,7 +96,7 @@ public class BoundingPolygons {
 			latitude = ThreadLocalRandom.current().nextDouble(boundingRectangle.getMinY(), boundingRectangle.getMaxY());
 			return new Waypoint(latitude, longitude);
 		}catch(java.lang.IllegalArgumentException e) {
-			System.err.println("You must ensure that the three or more points you pass in are not in a line or that you have initilzied a proper polygon");
+			log.error("You must ensure that the three or more points you pass in are not in a line or that you have initilzied a proper polygon");
 			throw new RuntimeException("You must ensure that the three or more points you pass in are not in a line or that you have initilzied a proper polygon");
 		}
 	}
@@ -158,7 +163,7 @@ public class BoundingPolygons {
 	 */
 	public Waypoint getAveragedWaypoint()
 	{
-		System.err.println("Something has gone wrong with generating the random point, either we maxed out on the 100 iterations or our exclusion zone is too large");
+		log.error("Something has gone wrong with generating the random point, either we maxed out on the 100 iterations or our exclusion zone is too large");
 		
         if (inclusionZones.isEmpty()) return new Waypoint(0,0);
 

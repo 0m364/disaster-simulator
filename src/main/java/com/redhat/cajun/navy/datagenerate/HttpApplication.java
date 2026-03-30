@@ -297,11 +297,9 @@ public class HttpApplication extends AbstractVerticle {
         ).send(response -> {
             ServicePolygon polygons[] = Json.decodeValue(response.result().bodyAsString(), ServicePolygon[].class);
             for (ServicePolygon polygon : polygons) {
-                Waypoint waypoints[] = new Waypoint[polygon.getPoints().size()];
-                polygon.getPoints().stream()
+                Waypoint waypoints[] = polygon.getPoints().stream()
                     .map(point -> new Waypoint(point[1], point[0]))
-                    .collect(Collectors.toList())
-                    .toArray(waypoints);
+                    .toArray(Waypoint[]::new);
                 log.info("Adding inclusion polygon to disaster with {} points", waypoints.length);
                 disaster.boundingPolygons.setInclusionPolygon(waypoints);
             }

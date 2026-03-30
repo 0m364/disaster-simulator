@@ -12,49 +12,20 @@ public class Main {
 
 
     public static void main(String[] args) throws Exception {
-
-        Options options = new Options();
-
-        Option mode = new Option("m", "mode", true, "server|cli");
-        mode.setRequired(true);
-        options.addOption(mode);
-
-        Option generate = new Option("g", "generate", true, "number of victims to generate");
-        generate.setRequired(true);
-        options.addOption(generate);
-
-        Option scrape = new Option("s", "scrape", true, "file path to scraped data json");
-        scrape.setRequired(false);
-        options.addOption(scrape);
-
-        Option geojson = new Option("map", "geojson", true, "file path to geojson map file");
-        geojson.setRequired(false);
-        options.addOption(geojson);
-
-        Option sim = new Option("sim", "simulation", false, "run physics simulation");
-        sim.setRequired(false);
-        options.addOption(sim);
-
-        Option steps = new Option("steps", "steps", true, "simulation steps (default 10)");
-        steps.setRequired(false);
-        options.addOption(steps);
-
-        Option out = new Option("out", "output", true, "output directory for images (default: output)");
-        out.setRequired(false);
-        options.addOption(out);
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd = null;
-
         try {
-            cmd = parser.parse(options, args);
+            run(args);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            formatter.printHelp("Main -m server|cli -g NUMBER", options);
-
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("Main -m server|cli -g NUMBER", getOptions());
             System.exit(1);
         }
+    }
+
+    public static void run(String[] args) throws Exception {
+        Options options = getOptions();
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
 
         int number = Integer.parseInt(cmd.getOptionValue("g"));
 
@@ -136,6 +107,39 @@ public class Main {
                 break;
             default: System.err.println("Incorrect mode");
         }
+    }
+
+    private static Options getOptions() {
+        Options options = new Options();
+
+        Option mode = new Option("m", "mode", true, "server|cli");
+        mode.setRequired(true);
+        options.addOption(mode);
+
+        Option generate = new Option("g", "generate", true, "number of victims to generate");
+        generate.setRequired(true);
+        options.addOption(generate);
+
+        Option scrape = new Option("s", "scrape", true, "file path to scraped data json");
+        scrape.setRequired(false);
+        options.addOption(scrape);
+
+        Option geojson = new Option("map", "geojson", true, "file path to geojson map file");
+        geojson.setRequired(false);
+        options.addOption(geojson);
+
+        Option sim = new Option("sim", "simulation", false, "run physics simulation");
+        sim.setRequired(false);
+        options.addOption(sim);
+
+        Option steps = new Option("steps", "steps", true, "simulation steps (default 10)");
+        steps.setRequired(false);
+        options.addOption(steps);
+
+        Option out = new Option("out", "output", true, "output directory for images (default: output)");
+        out.setRequired(false);
+        options.addOption(out);
+        return options;
     }
 
 }

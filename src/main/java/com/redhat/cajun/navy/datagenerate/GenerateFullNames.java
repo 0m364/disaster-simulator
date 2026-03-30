@@ -1,5 +1,7 @@
 package com.redhat.cajun.navy.datagenerate;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +16,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class GenerateFullNames {
+
+    private static Logger log = LoggerFactory.getLogger(GenerateFullNames.class);
 
     private static Map<Integer, String> fNames = null;
 
@@ -34,7 +38,7 @@ public class GenerateFullNames {
                 count++;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to read names from file: " + fileName, e);
         }
         return temp;
     }

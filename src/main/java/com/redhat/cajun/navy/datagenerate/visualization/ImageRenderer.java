@@ -6,6 +6,8 @@ import com.redhat.cajun.navy.datagenerate.physics.CoordinateConverter;
 import com.redhat.cajun.navy.datagenerate.physics.PhysicsSimulation;
 import com.redhat.cajun.navy.datagenerate.Responder;
 import com.redhat.cajun.navy.datagenerate.Victim;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Vector2;
 
@@ -19,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class ImageRenderer {
+
+    private static final Logger log = LoggerFactory.getLogger(ImageRenderer.class);
 
     private int width = 1024;
     private int height = 1024;
@@ -127,7 +131,7 @@ public class ImageRenderer {
         try {
             ImageIO.write(image, "PNG", new File(filepath));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to write image to " + filepath, e);
         }
     }
 }

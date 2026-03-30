@@ -11,9 +11,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class GenerateFullNames {
+
+    private static final Logger log = LoggerFactory.getLogger(GenerateFullNames.class);
 
     private static Map<Integer, String> fNames = null;
 
@@ -34,7 +38,7 @@ public class GenerateFullNames {
                 count++;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to read names from file: " + fileName, e);
         }
         return temp;
     }

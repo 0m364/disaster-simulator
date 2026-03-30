@@ -15,14 +15,22 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GenerateFullNames {
 
-    private static Map<Integer, String> fNames = null;
+    private static volatile Map<Integer, String> fNames = null;
 
-    private static Map<Integer, String> lNames = null;
+    private static volatile Map<Integer, String> lNames = null;
 
 
     public GenerateFullNames(String fNameFile, String lNameFile) {
-        fNames = Collections.unmodifiableMap(getMapFromFile(fNameFile));
-        lNames = Collections.unmodifiableMap(getMapFromFile(lNameFile));
+        if (fNames == null || lNames == null) {
+            synchronized (GenerateFullNames.class) {
+                if (fNames == null) {
+                    fNames = Collections.unmodifiableMap(getMapFromFile(fNameFile));
+                }
+                if (lNames == null) {
+                    lNames = Collections.unmodifiableMap(getMapFromFile(lNameFile));
+                }
+            }
+        }
     }
 
     public Map<Integer, String> getMapFromFile(String fileName) {

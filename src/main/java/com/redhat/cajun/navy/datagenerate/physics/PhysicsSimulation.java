@@ -11,8 +11,11 @@ import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 
+import java.security.SecureRandom;
+
 public class PhysicsSimulation {
 
+    private static final SecureRandom RANDOM = new SecureRandom();
     private World world;
     private CoordinateConverter converter;
 
@@ -46,7 +49,7 @@ public class PhysicsSimulation {
         // Velocity
         double speedKmH = r.getSpeed();
         double speedMS = speedKmH / 3.6;
-        double angle = Math.random() * 2 * Math.PI;
+        double angle = RANDOM.nextDouble() * 2 * Math.PI;
 
         Vector2 velocity = new Vector2(speedMS * Math.cos(angle), speedMS * Math.sin(angle));
         body.setLinearVelocity(velocity);

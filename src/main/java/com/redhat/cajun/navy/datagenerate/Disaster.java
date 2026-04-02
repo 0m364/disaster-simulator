@@ -1,5 +1,6 @@
 package com.redhat.cajun.navy.datagenerate;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,7 +14,7 @@ public class Disaster {
 
     private static GenerateFullNames fullNames = null;
     public BoundingPolygons boundingPolygons = new BoundingPolygons();
-    private Random random = new Random();
+    private Random random = new SecureRandom();
 
     // Simulation Parameters with defaults
     private int minPeople = 1;

@@ -1,5 +1,6 @@
 package com.redhat.cajun.navy.datagenerate;
 
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.Random;
 
@@ -11,7 +12,7 @@ public class GeneratePhoneNumbers {
     private final static int prefixCode = 555;
 
     private final static DecimalFormat fourDigits = new DecimalFormat("0000");
-    private final static Random random = new Random();
+    private final static Random random = new SecureRandom();
 
     private final static String format = "(%s) %s-%s";
 

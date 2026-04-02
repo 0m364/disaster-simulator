@@ -1,7 +1,5 @@
 package com.redhat.cajun.navy.datagenerate;
 
-import java.math.BigDecimal;
-
 public class Responder {
 
     private String id;
